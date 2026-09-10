@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYPE WATCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff2fb4;
+    --lime:#c6ff3a;
+    --cyan:#28f2ff;
+    --violet:#8a2cff;
+    --orange:#ff6a1f;
+    --ink:#0b0b12;
+    --card:#131320;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--ink);
+    font-family:'Unbounded', sans-serif;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* ===== animated background ===== */
+  .bg{
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,47,180,.35), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(40,242,255,.3), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(138,44,255,.35), transparent 45%),
+      radial-gradient(circle at 90% 80%, rgba(198,255,58,.2), transparent 40%),
+      var(--ink);
+    background-size:200% 200%;
+    animation: bgShift 14s ease-in-out infinite;
+    z-index:0;
+  }
+  @keyframes bgShift{
+    0%{ background-position:0% 0%; }
+    50%{ background-position:100% 100%; }
+    100%{ background-position:0% 0%; }
+  }
+  .grid{
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:38px 38px;
+    mask-image: radial-gradient(circle at 50% 45%, black 10%, transparent 75%);
+    z-index:0;
+  }
+  .noise{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .blob{
+    position:fixed; width:280px; height:280px; border-radius:50%;
+    filter: blur(60px); opacity:.5; z-index:0; pointer-events:none;
+  }
+  .blob1{ background:var(--pink); top:-60px; left:-60px; animation: float1 9s ease-in-out infinite; }
+  .blob2{ background:var(--cyan); bottom:-80px; right:-60px; animation: float2 11s ease-in-out infinite; }
+  @keyframes float1{ 0%,100%{ transform:translate(0,0);} 50%{ transform:translate(60px,40px);} }
+  @keyframes float2{ 0%,100%{ transform:translate(0,0);} 50%{ transform:translate(-50px,-30px);} }
+
+  /* ===== card ===== */
+  .card{
+    position:relative; z-index:2;
+    width:380px;
+    padding:36px 32px 28px;
+    border-radius:28px;
+    background:linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.02));
+    backdrop-filter: blur(18px);
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:
+      0 25px 70px rgba(0,0,0,.6),
+      0 0 0 1px rgba(255,255,255,.04) inset,
+      0 0 60px rgba(255,47,180,.15);
+  }
+  .card::before{
+    content:'';
+    position:absolute; inset:-1.5px;
+    border-radius:29px;
+    padding:1.5px;
+    background:conic-gradient(from 0deg, var(--pink), var(--violet), var(--cyan), var(--lime), var(--orange), var(--pink));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spin 6s linear infinite;
+    opacity:.8;
+    z-index:-1;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .top-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Black Han Sans', sans-serif;
+    font-size:12px; letter-spacing:1px;
+    color:var(--ink);
+    background:linear-gradient(120deg, var(--lime), var(--cyan));
+    padding:6px 12px;
+    border-radius:100px;
+    transform:rotate(-4deg);
+    box-shadow:0 4px 14px rgba(198,255,58,.4);
+  }
+  .stage{
+    font-size:10px; letter-spacing:3px; color:rgba(255,255,255,.55);
+    text-transform:uppercase;
+  }
+
+  h1{
+    font-family:'Black Han Sans', sans-serif;
+    font-size:22px;
+    letter-spacing:1px;
+    margin:0 0 2px;
+    background:linear-gradient(90deg, var(--pink), var(--violet), var(--cyan));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .sub{
+    font-size:11px; color:rgba(255,255,255,.45); margin-bottom:22px; letter-spacing:.5px;
+  }
+
+  /* ===== equalizer ===== */
+  .eq{
+    display:flex; align-items:flex-end; justify-content:center; gap:4px;
+    height:22px; margin-bottom:6px;
+  }
+  .eq span{
+    width:4px; border-radius:3px;
+    background:linear-gradient(180deg, var(--lime), var(--cyan));
+    height:6px;
+    transition: height .15s ease;
+  }
+  .eq.dancing span{ animation: dance 0.9s ease-in-out infinite; }
+  .eq span:nth-child(1){ animation-delay:.0s; }
+  .eq span:nth-child(2){ animation-delay:.1s; }
+  .eq span:nth-child(3){ animation-delay:.2s; }
+  .eq span:nth-child(4){ animation-delay:.3s; }
+  .eq span:nth-child(5){ animation-delay:.15s; }
+  .eq span:nth-child(6){ animation-delay:.25s; }
+  .eq span:nth-child(7){ animation-delay:.05s; }
+  @keyframes dance{
+    0%,100%{ height:6px; }
+    30%{ height:22px; }
+    60%{ height:12px; }
+  }
+
+  /* ===== display ===== */
+  .display-wrap{
+    text-align:center;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .display{
+    font-family:'Unbounded', sans-serif;
+    font-weight:900;
+    font-size:52px;
+    line-height:1;
+    letter-spacing:1px;
+    font-variant-numeric: tabular-nums;
+    background:linear-gradient(100deg, #fff, var(--cyan) 40%, var(--pink) 70%, #fff);
+    background-size:300% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation: shine 4s linear infinite;
+    filter: drop-shadow(0 0 18px rgba(255,47,180,.35));
+  }
+  @keyframes shine{
+    to{ background-position:-300% 0; }
+  }
+  .display .ms{
+    font-size:24px;
+    opacity:.7;
+  }
+  .display.glitch{ animation: shine 4s linear infinite, glitch .18s steps(2) 1; }
+  @keyframes glitch{
+    0%{ transform:translate(0,0); }
+    20%{ transform:translate(-2px,1px); }
+    40%{ transform:translate(2px,-1px); }
+    60%{ transform:translate(-1px,-1px); }
+    80%{ transform:translate(1px,1px); }
+    100%{ transform:translate(0,0); }
+  }
+
+  /* ===== buttons ===== */
+  .buttons{
+    display:flex; gap:10px; margin-bottom:18px;
+  }
+  button{
+    font-family:'Black Han Sans', sans-serif;
+    border:none;
+    border-radius:16px;
+    padding:15px 10px;
+    font-size:14px;
+    letter-spacing:.5px;
+    cursor:pointer;
+    flex:1;
+    color:#fff;
+    position:relative;
+    transition: transform .12s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  button:active{ transform:scale(.94); }
+  button:disabled{ opacity:.3; cursor:not-allowed; }
+
+  #startStopBtn{
+    background:linear-gradient(120deg, var(--pink), var(--violet));
+    box-shadow:0 8px 24px rgba(255,47,180,.45);
+    animation: pulseGlow 1.6s ease-in-out infinite;
+  }
+  #startStopBtn.running{
+    background:linear-gradient(120deg, var(--orange), var(--pink));
+    box-shadow:0 8px 24px rgba(255,106,31,.5);
+    animation: pulseGlowFast 0.6s ease-in-out infinite;
+  }
+  @keyframes pulseGlow{
+    0%,100%{ box-shadow:0 8px 24px rgba(255,47,180,.35); }
+    50%{ box-shadow:0 8px 32px rgba(255,47,180,.65); }
+  }
+  @keyframes pulseGlowFast{
+    0%,100%{ box-shadow:0 8px 22px rgba(255,106,31,.4); }
+    50%{ box-shadow:0 10px 30px rgba(255,106,31,.85); }
+  }
+
+  #lapBtn{
+    background:linear-gradient(120deg, var(--cyan), var(--violet));
+    box-shadow:0 8px 20px rgba(40,242,255,.3);
+  }
+  #resetBtn{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:none;
+  }
+
+  /* ===== laps ===== */
+  .laps-head{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:10px; letter-spacing:2px; color:rgba(255,255,255,.4);
+    margin-bottom:8px; text-transform:uppercase;
+  }
+  .laps{
+    max-height:170px;
+    overflow-y:auto;
+    padding-right:4px;
+  }
+  .laps::-webkit-scrollbar{ width:5px; }
+  .laps::-webkit-scrollbar-thumb{ background:linear-gradient(var(--pink), var(--cyan)); border-radius:3px; }
+  .lap-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 12px;
+    margin-bottom:6px;
+    border-radius:12px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:13px;
+    color:#f0f0ff;
+    font-variant-numeric: tabular-nums;
+    animation: popIn .25s ease;
+  }
+  .lap-item .tag{
+    font-family:'Black Han Sans', sans-serif;
+    font-size:11px;
+    color:var(--lime);
+    letter-spacing:1px;
+  }
+  @keyframes popIn{
+    from{ opacity:0; transform:translateY(-6px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  /* confetti */
+  .confetti{
+    position:fixed; top:0; left:0; width:8px; height:8px;
+    border-radius:2px; z-index:5; pointer-events:none;
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="grid"></div>
+  <div class="noise"></div>
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+
+  <div class="card">
+    <div class="top-row">
+      <span class="badge">🔥 HYPE</span>
+      <span class="stage">K-STAGE TIMER</span>
+    </div>
+    <h1>HYPE WATCH</h1>
+    <div class="sub">무대 위 모든 순간, 비트에 맞춰 카운트</div>
+
+    <div class="eq" id="eq">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="display-wrap">
+      <div class="display" id="display">00:00<span class="ms">.00</span></div>
+    </div>
+
+    <div class="buttons">
+      <button id="startStopBtn">▶ START</button>
+      <button id="lapBtn" disabled>⚡ LAP</button>
+      <button id="resetBtn" disabled>↺ RESET</button>
+    </div>
+
+    <div class="laps-head">
+      <span>SET LIST</span>
+      <span id="lapCountLabel">0 laps</span>
+    </div>
+    <div class="laps" id="laps"></div>
+  </div>
+
+<script>
+  let startTime = 0;
+  let elapsed = 0;
+  let rafId = null;
+  let running = false;
+  let lapCount = 0;
+
+  const display = document.getElementById('display');
+  const startStopBtn = document.getElementById('startStopBtn');
+  const lapBtn = document.getElementById('lapBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const laps = document.getElementById('laps');
+  const lapCountLabel = document.getElementById('lapCountLabel');
+  const eq = document.getElementById('eq');
+
+  function format(ms) {
+    const totalMs = Math.floor(ms);
+    const minutes = Math.floor(totalMs / 60000);
+    const seconds = Math.floor((totalMs % 60000) / 1000);
+    const centis = Math.floor((totalMs % 1000) / 10);
+    const pad = (n) => String(n).padStart(2, '0');
+    return { main: `${pad(minutes)}:${pad(seconds)}`, ms: pad(centis) };
+  }
+
+  function render() {
+    const { main, ms } = format(elapsed);
+    display.innerHTML = `${main}<span class="ms">.${ms}</span>`;
+  }
+
+  function tick() {
+    elapsed = performance.now() - startTime;
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function start() {
+    running = true;
+    startTime = performance.now() - elapsed;
+    rafId = requestAnimationFrame(tick);
+    startStopBtn.textContent = '⏸ STOP';
+    startStopBtn.classList.add('running');
+    lapBtn.disabled = false;
+    resetBtn.disabled = false;
+    eq.classList.add('dancing');
+  }
+
+  function stop() {
+    running = false;
+    cancelAnimationFrame(rafId);
+    startStopBtn.textContent = '▶ START';
+    startStopBtn.classList.remove('running');
+    lapBtn.disabled = true;
+    eq.classList.remove('dancing');
+    display.classList.add('glitch');
+    setTimeout(() => display.classList.remove('glitch'), 200);
+  }
+
+  function reset() {
+    elapsed = 0;
+    lapCount = 0;
+    render();
+    laps.innerHTML = '';
+    resetBtn.disabled = true;
+    lapCountLabel.textContent = '0 laps';
+  }
+
+  function burstConfetti(x, y) {
+    const colors = ['#ff2fb4', '#28f2ff', '#c6ff3a', '#8a2cff', '#ff6a1f'];
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.background = colors[i % colors.length];
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      document.body.appendChild(el);
+      const angle = (Math.PI * 2 * i) / 16;
+      const dist = 60 + Math.random() * 60;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      el.animate([
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) rotate(${Math.random()*360}deg)`, opacity: 0 }
+      ], { duration: 600 + Math.random() * 300, easing: 'ease-out' });
+      setTimeout(() => el.remove(), 950);
+    }
+  }
+
+  startStopBtn.addEventListener('click', () => {
+    running ? stop() : start();
+  });
+
+  lapBtn.addEventListener('click', (e) => {
+    lapCount++;
+    const { main, ms } = format(elapsed);
+    const item = document.createElement('div');
+    item.className = 'lap-item';
+    item.innerHTML = `<span class="tag">LAP ${lapCount}</span><span>${main}.${ms}</span>`;
+    laps.prepend(item);
+    lapCountLabel.textContent = `${lapCount} lap${lapCount > 1 ? 's' : ''}`;
+    const rect = lapBtn.getBoundingClientRect();
+    burstConfetti(rect.left + rect.width / 2, rect.top);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!running) reset();
+  });
+
+  render();
+</script>
+</body>
+</html>
