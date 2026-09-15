@@ -208,8 +208,8 @@ description: 박사논문(한국 섬유패션산업의 지속가능한 시장가
 **중요한 기술적 한계**: Google Scholar는 공식 API가 없고 자동 조회를 차단한다(양쪽 원본 문서 모두 "Scholar를 직접 크롤링하지 않는다"고 명시). 따라서 발견 단계는 아래 순서로 시도하고, 실패하면 다음으로 넘어간다 — 어느 방법으로 찾았든 결과에 항상 **출처를 명시**한다:
 
 1. **Gmail의 Google Scholar Alert 메일** — Gmail 커넥터(`mcp__Gmail__search_threads` / `get_thread`)가 읽기 권한으로 연결되어 있으면 사용 가능. `mcp__Gmail__search_threads`로 `from:scholaralerts-noreply@google.com`(또는 사용자가 등록한 Alert 발신 주소) 쿼리로 오늘 도착한 메일을 찾고, `get_thread`로 본문에서 논문 제목·링크를 파싱한다. **전제조건**: 사용자가 `연구계획서.md` §12.3의 검색식으로 Google Scholar Alert를 실제로 등록해 뒀어야 한다 — 등록돼 있지 않으면(검색 결과 0건) 이 방법은 건너뛰고 2번으로 넘어간다. 가장 원래 설계(§12.6 1단계)에 가깝고 우선순위가 가장 높다.
-2. **OpenAlex API** (키 불필요, 무료) — `https://api.openalex.org/works?search=<키워드>&sort=publication_date:desc&per-page=10` 형태로, `연구계획서.md` §12.2 키워드 맵과 `docs/seed_papers.md`의 검색 단서를 순환하며 질의. 제목·저자·저널·연도·DOI·인용수(`cited_by_count`)·초록(`abstract_inverted_index` 복원)을 얻는다. Google Scholar와 같은 학술 인용 데이터베이스를 인덱싱하므로 사실상 동등한 커버리지를 제공하는 합법적 대체 소스다.
-3. **WebSearch 도구** — 위 두 방법이 모두 불가능할 때만 최후 수단으로 사용. 저널 워치리스트(`연구계획서.md` §12.1) + 키워드로 검색해 최근 발행 논문을 찾는다.
+2. **OpenAlex API** (키 불필요, 무료) — `https://api.openalex.org/works?search=<키워드>&sort=publication_date:desc&per-page=10` 형태로, `연구계획서.md` §12.2 키워드 맵과 `docs/seed_papers.md`의 검색 단서를 순환하며 질의. 제목·저자·저널·연도·DOI·인용수(`cited_by_count`)·초록(`abstract_inverted_index` 복원)을 얻는다. Google Scholar와 같은 학술 인용 데이터베이스를 인덱싱하므로 사실상 동등한 커버리지를 제공하는 합법적 대체 소스다. **환경 제약**: 2026-09-15 실제 실행에서 Claude Code Remote 환경의 egress 정책이 `api.openalex.org`로의 Bash `curl`을 차단(`gateway 403`)하는 것을 확인했다. 이 환경에서는 시도하되, 막히면 즉시 3번으로 넘어간다 — 재시도로 시간 낭비하지 않는다. (다른 환경/향후 실제 Python 파이프라인에서는 정상 작동할 수 있음.)
+3. **WebSearch 도구** — 1·2가 안 되면 사용. 같은 실행에서 `WebFetch`로 개별 저널 원문 페이지(nature.com, ncbi.nlm.nih.gov 등)에 접근하는 것도 `EGRESS_BLOCKED`로 막히는 것을 확인했다 — 이 환경에서는 **WebSearch만 안정적으로 작동**한다. 저널 워치리스트(`연구계획서.md` §12.1) + 키워드로 검색하고, 검색 결과 스니펫에서 얻을 수 있는 서지정보(제목·저자·저널·연도·DOI·핵심 발견)만 사용한다 — 스니펫에 없는 표본수·국가·정확한 초록 전문 등은 "확인 불가"로 명시하고 지어내지 않는다(§11).
 
 후보가 여러 개면 전부 §2로 채점하고, **DB에 없는 것 중 최고점 1편**만 "오늘의 논문"으로 확정한다. 후보가 하나도 없으면(모든 방법 실패, 또는 신규 논문 없음) 카카오톡·Gmail 모두 보내지 않고 그 사실만 사용자에게 알린다 — 빈 브리핑을 보내지 않는다.
 
