@@ -18,9 +18,9 @@
 목표는 매일 KST 08:29에 신규 논문 1편을 찾아 5개 필드(제목/저널/연도/인용수/초록)를 카카오톡으로, 85점 이상이면 5쪽 요약을 Gmail로 보내는 것(`연구계획서.md` §12.11, skill §5~§8).
 
 - **카카오톡**: `mcp__PlayMCP__KakaotalkChat-MemoChat` 도구가 이 계정에 연결되어 있어 바로 작동한다.
-- **Gmail**: 발송 가능한 MCP 커넥터가 아직 연결되어 있지 않다. 연결 전까지 skill은 이메일 본문을 만들어 보여주는 데서 멈추고, "보냈다"고 보고하지 않는다. Gmail 발송이 필요하면 claude.ai 커넥터 설정에서 Gmail(또는 동등 이메일) 커넥터를 연결해야 한다.
+- **Gmail**: 커넥터는 연결됐다(2026-09-15 확인). 단 **부여된 스코프가 읽기 전용**이라 `search_threads`/`get_thread`(§5 발견 단계용)는 되지만, `send_message`·`create_draft`(§7 발송 단계용)는 둘 다 `Insufficient scope` 오류를 낸다. 실제로 보내려면 claude.ai 커넥터 설정에서 Gmail을 "보내기(gmail.send)" 또는 최소 "임시보관함 생성(gmail.compose)" 권한까지 포함해 다시 연결해야 한다. 그 전까지 skill은 이메일 본문을 만들어 보여주는 데서 멈추고, "보냈다"고 보고하지 않는다.
 - **매일 08:29 자동 실행 자체**: `SKILL.md`는 절차서일 뿐 스스로 깨어나지 않는다. 실제로 매일 자동 실행하려면 Claude Code Remote **Routine**(cron `29 23 * * *`, UTC)을 등록해야 하며, 이는 매일 실제 메시지를 발송하는 지속 동작이므로 사용자 확인 없이 스킬이 스스로 등록하지 않는다.
-- **논문 발견**: Google Scholar는 공식 API가 없고 자동조회를 차단하므로 직접 크롤링하지 않는다. 1순위는 Gmail의 Scholar Alert 메일 파싱(Gmail 연동 필요), 2순위는 OpenAlex API(무료·무키, Scholar와 동등한 인용 데이터 제공), 최후 수단은 WebSearch.
+- **논문 발견**: Google Scholar는 공식 API가 없고 자동조회를 차단하므로 직접 크롤링하지 않는다. 1순위는 Gmail의 Scholar Alert 메일 검색·파싱(읽기 스코프로 이미 가능 — 단 사용자가 Alert를 실제로 등록해 둬야 검색결과가 나온다, 2026-09-15 기준 미등록), 2순위는 OpenAlex API(무료·무키, Scholar와 동등한 인용 데이터 제공), 최후 수단은 WebSearch.
 
 ## 개발 규칙 (향후 코드/파이프라인 구현 시)
 
