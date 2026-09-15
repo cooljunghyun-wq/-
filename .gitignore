@@ -1,0 +1,13 @@
+# 민감정보 — 절대 커밋하지 않음
+.env
+credentials*.json
+kakao_token*.json
+gmail_token*.json
+
+# 로컬 DB/캐시
+*.db
+__pycache__/
+
+# 제3자 논문 원문 PDF 캐시 (저작권 — docs/의 프로젝트 자체 원본 문서는 예외로 커밋됨)
+research/papers/*
+!research/papers/.gitkeep
