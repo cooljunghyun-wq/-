@@ -234,7 +234,7 @@ description: 박사논문(한국 섬유패션산업의 지속가능한 시장가
 
 ## 7. Gmail 발송 — 5쪽 요약
 
-**전제 조건**: 이 skill은 Gmail을 직접 보내는 도구를 자체적으로 갖고 있지 않다. 실행 시점에 `mcp__Gmail__send_message`(또는 최소 `mcp__Gmail__create_draft`)가 이 세션에서 **스코프 오류 없이** 호출되는지 먼저 확인한다 — Gmail 커넥터가 `ListConnectors`에 `connected`로 떠 있어도 **읽기 스코프만 부여됐을 수 있다** (`search_threads`/`get_thread`는 되지만 `send_message`/`create_draft`가 `Insufficient scope` 오류를 내는 경우가 실제로 있었다 — 2026-09-15 확인). 반드시 한 번 호출해 결과로 판단하고, 연결 여부를 지레짐작하지 않는다.
+**전제 조건**: 이 skill은 Gmail을 직접 보내는 도구를 자체적으로 갖고 있지 않다. 실행 시점에 `mcp__Gmail__send_message`(또는 최소 `mcp__Gmail__create_draft`)가 이 세션에서 **스코프 오류 없이** 호출되는지 먼저 확인한다 — Gmail 커넥터가 `ListConnectors`에 `connected`로 떠 있어도 스코프가 읽기 전용일 수 있으니 지레짐작하지 않는다(2026-09-15 최초 연결 시 `search_threads`는 되는데 `send_message`/`create_draft`가 `Insufficient scope`였던 사례 있음; 같은 날 재연결(발송 권한 포함) 후 `send_message` 재시도로 정상 발송·수신함 도착까지 확인됨 — 이후로는 정상 동작을 전제로 하되, 스코프가 다시 좁아질 수 있으니 매 실행 시 한 번은 실제 호출 결과로 판단한다).
 
 - **`send_message`가 성공하면**: §3에서 만든 5쪽 요약을 이메일 본문(또는 마크다운 첨부)으로 변환해 제목 `[박사논문 리서치] {날짜} — {논문 제목}`으로 사용자 본인 Gmail 주소로 발송한다.
 - **`send_message`가 스코프 오류를 내지만 `create_draft`는 성공하면**: 초안으로 만들어 사용자가 검토 후 직접 보내게 한다. 자동 "발송"은 아니었다는 점을 함께 알린다.
